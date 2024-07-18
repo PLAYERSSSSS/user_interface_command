@@ -1,0 +1,2 @@
+setuptools~=65.5.1
+keyboard~=0.13.5
