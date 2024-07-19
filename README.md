@@ -15,7 +15,7 @@
 > After all widget objects have been inserted, the reset() member function in the Frame object is called to refresh the command line.  
 
 
-## Demo 示范
+## Demo-示范
 ```Python
 from UIC import Frame
 from UIC.module.Button import Button
