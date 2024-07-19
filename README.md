@@ -14,6 +14,7 @@
 > Note: widget specifies which row to insert (starting from 0) column specifies which column to insert (starting from 0).  
 > After all widget objects have been inserted, the reset() member function in the Frame object is called to refresh the command line.  
 
+
 ## Demo 示范
 ```Python
 from UIC import Frame
