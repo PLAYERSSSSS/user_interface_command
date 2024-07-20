@@ -13,16 +13,14 @@
 
 ## Demo 示范
 ```Python
-from UIC import Frame
-from UIC.module.Button import Button
-from UIC.module.Label import Label
+import UIC
 
-w = Frame(5, 5)
+w = UIC.Frame(5, 5)
 
-button = Button("text")
+button = UIC.Button.Button("text")
 button.setHoveBackColor((255, 255, 255))
 button.setHoveColor((0, 0, 0))
-label = Label("text")
+label = UIC.Label.Label("text")
 
 w.addWidget(button, 0, 0)
 w.addWidget(label, 0, 1)
