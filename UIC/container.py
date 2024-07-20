@@ -9,8 +9,7 @@ class Frame:
     def __init__(self, lineNumber: int, columnsNumber: int, threadingPool=ThreadPoolExecutor(max_workers=1)):
         if sys.platform.startswith('win'):
             os.system("")
-
-        threadingPool.submit(self._keyEvent_)
+        self.pool = threadingPool
         self.point = [0, 0]
         self.lineNumber = lineNumber
         self.columnsNumber = columnsNumber
@@ -64,7 +63,6 @@ class Frame:
                     element.press()
 
                 self.reset()
-
         keyboard.on_press(callback)
         keyboard.wait()
 
@@ -108,6 +106,10 @@ class Frame:
                     text += f"\033[038;2;{el.getColor()[0]};{el.getColor()[1]};{el.getColor()[2]}m\033[048;2;{el.getBackColor()[0]};{el.getBackColor()[1]};{el.getBackColor()[2]}m{el.getText()}\033[0m"
             text += "\n"
         print(text)
+
+    def firesLoading(self):
+        self.pool.submit(self._keyEvent_)
+        self.reset()
 
     def addWidget(self, widget, row: int, column: int):
         self._structure_[row][column] = widget
