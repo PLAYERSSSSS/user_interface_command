@@ -27,5 +27,5 @@ label = Label("text")
 w.addWidget(button, 0, 0)
 w.addWidget(label, 0, 1)
 w.addWidget(button, 0, 2)
-w.firesLoading()firesLoading
+w.firesLoading()
 ```
