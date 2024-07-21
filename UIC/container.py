@@ -1,12 +1,13 @@
 import os
 import sys
 from concurrent.futures.thread import ThreadPoolExecutor
-
+from blessings import Terminal
 import keyboard
 
 
 class Frame:
-    def __init__(self, lineNumber: int, columnsNumber: int, threadingPool=ThreadPoolExecutor(max_workers=1), vacancyReplacement: str = ""):
+    def __init__(self, lineNumber: int, columnsNumber: int, threadingPool=ThreadPoolExecutor(max_workers=1),
+                 vacancyReplacement: str = ""):
         self.isLinux = sys.platform.startswith('linux')
         self.vacancyReplacement = vacancyReplacement
         self.pool = threadingPool
@@ -15,11 +16,12 @@ class Frame:
         self.columnsNumber = columnsNumber
         self._structure_ = []
         self._newStructure_(lineNumber, columnsNumber)
+        self.term = Terminal()
         if not self.isLinux:
             os.system("")
 
     def _newStructure_(self, lineNumber: int, columnsNumber: int):
-        self._structure_ = [[None] * columnsNumber for i in range(lineNumber)]
+        self._structure_ = [[None] * columnsNumber for _ in range(lineNumber)]
 
     def _keyEvent_(self):
         def callback(e):
@@ -72,6 +74,9 @@ class Frame:
     def setStructure(self, structure: list[list]):
         self._structure_ = structure
 
+    def getStructure(self):
+        return self._structure_
+
     def _rollbackAnOperation_(self, e):
         i = self.point
         while True:
@@ -120,3 +125,6 @@ class Frame:
 
     def getWidget(self, row: int, column):
         return self._structure_[row][column]
+
+    def close(self):
+        pass

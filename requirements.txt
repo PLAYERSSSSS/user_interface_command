@@ -1,2 +1,4 @@
-setuptools~=65.5.1
+setuptools~=68.1.2
 keyboard~=0.13.5
+UIC~=1.0.0
+blessings~=1.7
