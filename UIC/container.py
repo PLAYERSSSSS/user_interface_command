@@ -6,15 +6,17 @@ import keyboard
 
 
 class Frame:
-    def __init__(self, lineNumber: int, columnsNumber: int, threadingPool=ThreadPoolExecutor(max_workers=1)):
-        if sys.platform.startswith('win'):
-            os.system("")
+    def __init__(self, lineNumber: int, columnsNumber: int, threadingPool=ThreadPoolExecutor(max_workers=1), vacancyReplacement: str = ""):
+        self.isLinux = sys.platform.startswith('linux')
+        self.vacancyReplacement = vacancyReplacement
         self.pool = threadingPool
         self.point = [0, 0]
         self.lineNumber = lineNumber
         self.columnsNumber = columnsNumber
         self._structure_ = []
         self._newStructure_(lineNumber, columnsNumber)
+        if not self.isLinux:
+            os.system("")
 
     def _newStructure_(self, lineNumber: int, columnsNumber: int):
         self._structure_ = [[None] * columnsNumber for i in range(lineNumber)]
@@ -63,8 +65,9 @@ class Frame:
                     element.press()
 
                 self.reset()
+
         keyboard.on_press(callback)
-        keyboard.wait()
+        keyboard.wait(suppress=True)
 
     def setStructure(self, structure: list[list]):
         self._structure_ = structure
@@ -97,8 +100,9 @@ class Frame:
         text = ""
         for i in range(0, len(self._structure_)):
             for k in range(0, len(self._structure_[i])):
-                el = self._structure_[i][k]
+                el = self.getWidget(i, k)
                 if el is None:
+                    text += self.vacancyReplacement
                     continue
                 if i == self.point[0] and k == self.point[1] and el.getIsSelected():
                     text += f"\033[038;2;{el.getHoveColor()[0]};{el.getHoveColor()[1]};{el.getHoveColor()[2]}m\033[048;2;{el.getHoveBackColor()[0]};{el.getHoveBackColor()[1]};{el.getHoveBackColor()[2]}m{el.getHoveText()}\033[0m"
