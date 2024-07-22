@@ -1,2 +1,3 @@
 from .container import Frame
-from .module import Button, Label
+from .module.Button import Button
+from .module.Label import Label

@@ -16,11 +16,10 @@
 import UIC
 
 w = UIC.Frame(5, 5)
-
-button = UIC.Button.Button("text")
+button = UIC.Button("text")
 button.setHoveBackColor((255, 255, 255))
 button.setHoveColor((0, 0, 0))
-label = UIC.Label.Label("text")
+label = UIC.Label("text")
 
 w.addWidget(button, 0, 0)
 w.addWidget(label, 0, 1)

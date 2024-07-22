@@ -1,8 +1,9 @@
 import os
 import sys
 from concurrent.futures.thread import ThreadPoolExecutor
-from blessings import Terminal
+
 import keyboard
+from blessings import Terminal
 
 
 class Frame:
@@ -127,4 +128,5 @@ class Frame:
         return self._structure_[row][column]
 
     def close(self):
-        pass
+        self.pool.shutdown(wait=False)
+        print("\033c")
