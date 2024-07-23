@@ -1,9 +1,13 @@
 import os
 import sys
+import time
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import keyboard
 from blessings import Terminal
+
+from UIC.module.Input import Input
+from UIC.module.Button import Button
 
 
 class Frame:
@@ -25,7 +29,18 @@ class Frame:
         self._structure_ = [[None] * columnsNumber for _ in range(lineNumber)]
 
     def _keyEvent_(self):
-        def callback(e):
+        def callback(e: keyboard.KeyboardEvent):
+            el = self.getWidget(*self.point)
+            if el is not None and isinstance(el, Input):
+                if len(e.name) == 1 or e.name in ["space", "tab"]:
+                    el.change(e)
+                else:
+                    if e.name == "enter":
+                        el.press()
+                    if e.name == "backspace":
+                        el.setText(el.value[0: -1])
+                self.reset()
+
             if e.event_type == 'down':
                 i = self.point
                 while True:
@@ -60,17 +75,19 @@ class Frame:
                     else:
                         break
 
-                if self.getWidget(*self.point) is None or not self.getWidget(*self.point).getIsSelected():
+                element = self.getWidget(*self.point)
+                if element is None or not element.getIsSelected():
                     self.point = i
                     self._rollbackAnOperation_(e)
 
-                if e.name == "enter" and hasattr(element := self.getWidget(*self.point), "press"):
-                    element.press()
+                if e.name == "enter":
+                    if isinstance(element, Button):
+                        element.press()
 
                 self.reset()
 
-        keyboard.on_press(callback)
-        keyboard.wait(suppress=True)
+        keyboard.on_press(callback, suppress=True)
+        keyboard.wait()
 
     def setStructure(self, structure: list[list]):
         self._structure_ = structure
