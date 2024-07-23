@@ -3,7 +3,8 @@ import sys
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import keyboard
-from blessings import Terminal
+
+from UIC.module.Button import Button
 
 
 class Frame:
@@ -17,7 +18,6 @@ class Frame:
         self.columnsNumber = columnsNumber
         self._structure_ = []
         self._newStructure_(lineNumber, columnsNumber)
-        self.term = Terminal()
         if not self.isLinux:
             os.system("")
 
@@ -25,7 +25,11 @@ class Frame:
         self._structure_ = [[None] * columnsNumber for _ in range(lineNumber)]
 
     def _keyEvent_(self):
-        def callback(e):
+        def callback(e: keyboard.KeyboardEvent):
+            el = self.getWidget(*self.point)
+            if el is not None and hasattr(el, "keyEvent"):
+                el.keyEvent(e, self)
+
             if e.event_type == 'down':
                 i = self.point
                 while True:
@@ -60,17 +64,19 @@ class Frame:
                     else:
                         break
 
-                if self.getWidget(*self.point) is None or not self.getWidget(*self.point).getIsSelected():
+                element = self.getWidget(*self.point)
+                if element is None or not element.getIsSelected():
                     self.point = i
                     self._rollbackAnOperation_(e)
 
-                if e.name == "enter" and hasattr(element := self.getWidget(*self.point), "press"):
-                    element.press()
+                if e.name == "enter":
+                    if isinstance(element, Button):
+                        element.press()
 
                 self.reset()
 
-        keyboard.on_press(callback)
-        keyboard.wait(suppress=True)
+        keyboard.on_press(callback, suppress=True)
+        keyboard.wait()
 
     def setStructure(self, structure: list[list]):
         self._structure_ = structure
