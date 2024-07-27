@@ -1,23 +1,25 @@
 import os
 import sys
 from concurrent.futures.thread import ThreadPoolExecutor
-
 import keyboard
-
 from UIC.module.Button import Button
 
 
 class Frame:
     def __init__(self, lineNumber: int, columnsNumber: int, threadingPool=ThreadPoolExecutor(max_workers=1),
-                 vacancyReplacement: str = ""):
+                 vacancyReplacement: str = None):
         self.isLinux = sys.platform.startswith('linux')
-        self.vacancyReplacement = vacancyReplacement
         self.pool = threadingPool
         self.point = [0, 0]
         self.lineNumber = lineNumber
         self.columnsNumber = columnsNumber
         self._structure_ = []
         self._newStructure_(lineNumber, columnsNumber)
+        self.bg = (0, 0, 0)
+        if vacancyReplacement is None:
+            self.vacancyReplacement = " " * 8
+        else:
+            self.vacancyReplacement = vacancyReplacement
         if not self.isLinux:
             os.system("")
 
@@ -27,8 +29,11 @@ class Frame:
     def _keyEvent_(self):
         def callback(e: keyboard.KeyboardEvent):
             el = self.getWidget(*self.point)
+            isTransmit = True
             if el is not None and hasattr(el, "keyEvent"):
-                el.keyEvent(e, self)
+                isTransmit = el.keyEvent(e, self)
+            if isTransmit:
+                return None
 
             if e.event_type == 'down':
                 i = self.point
@@ -75,7 +80,7 @@ class Frame:
 
                 self.reset()
 
-        keyboard.on_press(callback, suppress=True)
+        keyboard.on_press(callback)
         keyboard.wait()
 
     def setStructure(self, structure: list[list]):
@@ -108,20 +113,40 @@ class Frame:
                 self.point = i
 
     def reset(self):
-        print("\033c", end="")
+        size = os.get_terminal_size()
         text = ""
         for i in range(0, len(self._structure_)):
+            lineList = []
             for k in range(0, len(self._structure_[i])):
                 el = self.getWidget(i, k)
                 if el is None:
-                    text += self.vacancyReplacement
-                    continue
-                if i == self.point[0] and k == self.point[1] and el.getIsSelected():
-                    text += f"\033[038;2;{el.getHoveColor()[0]};{el.getHoveColor()[1]};{el.getHoveColor()[2]}m\033[048;2;{el.getHoveBackColor()[0]};{el.getHoveBackColor()[1]};{el.getHoveBackColor()[2]}m{el.getHoveText()}\033[0m"
+                    elObj = None
+                elif i == self.point[0] and k == self.point[1] and el.getIsSelected():
+                    elObj = [
+                        f"\033[038;2;{el.getHoveColor()[0]};{el.getHoveColor()[1]};{el.getHoveColor()[2]}m\033[048;2;{el.getHoveBackColor()[0]};{el.getHoveBackColor()[1]};{el.getHoveBackColor()[2]}m",
+                        f"{el.getHoveText()}", "\033[0m"]
                 else:
-                    text += f"\033[038;2;{el.getColor()[0]};{el.getColor()[1]};{el.getColor()[2]}m\033[048;2;{el.getBackColor()[0]};{el.getBackColor()[1]};{el.getBackColor()[2]}m{el.getText()}\033[0m"
-            text += "\n"
-        print(text)
+                    elObj = [
+                        f"\033[038;2;{el.getColor()[0]};{el.getColor()[1]};{el.getColor()[2]}m\033[048;2;{el.getBackColor()[0]};{el.getBackColor()[1]};{el.getBackColor()[2]}m",
+                        f"{el.getText()}", "\033[0m"]
+                lineList.append(elObj)
+            el_size = size.columns // self.columnsNumber
+            fb = f"\033[048;2;{self.bg[0]};{self.bg[1]};{self.bg[2]}m "
+            for index, j in enumerate(lineList):
+                if j is None:
+                    text += fb * el_size
+                else:
+                    if len(j[1]) <= el_size:
+                        text += f"{j[0]}{j[1]}{j[2]}{fb * (el_size - len(j[1]))}"
+                    else:
+                        text += f"{j[0]}{j[1][: el_size]}{j[2]}"
+
+            if (excess := size.columns % self.columnsNumber) != 0:
+                text += fb * excess
+            if i < len(self._structure_) - 1:
+                text += "\n"
+        print("\033c", end="")
+        print(text[: -1])
 
     def firesLoading(self):
         self.pool.submit(self._keyEvent_)

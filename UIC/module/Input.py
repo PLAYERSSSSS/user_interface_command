@@ -1,4 +1,5 @@
 import re
+import sys
 
 import keyboard
 
@@ -34,6 +35,7 @@ class Input(template):
             if e.name == "backspace":
                 self.setText(self.value[0: -1])
         frame.reset()
+        return True
 
     def press(self):
         self.pressEvent()
@@ -48,10 +50,13 @@ class Input(template):
                 self.setText(self.value + "    ")
 
         else:
-            if e.modifiers is not None and "shift" in e.modifiers:
-                if re.match("[a-z]", e.name):
-                    self.setText(self.value + e.name.upper())
+            if keyboard.is_pressed("shift"):
+                if sys.platform.startswith('linux'):
+                    if re.match("[a-z]", e.name):
+                        self.setText(self.value + e.name.upper())
+                    else:
+                        self.setText(self.value + caseMappingTable.get(e.name))
                 else:
-                    self.setText(self.value + caseMappingTable.get(e.name))
+                    self.setText(self.value + e.name)
             else:
                 self.setText(self.value + e.name)

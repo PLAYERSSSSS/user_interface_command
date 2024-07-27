@@ -18,6 +18,6 @@ setuptools.setup(
         "License :: OSI Approved :: BSD-3 License",
         "Operating System :: OS Independent",
     ],
-    install_requires=['keyboard>=0.13.5', 'blessings>=1.7'],
+    install_requires=['keyboard>=0.13.5'],
     python_requires='>=3.6',  # 对python的最低版本要求
 )
