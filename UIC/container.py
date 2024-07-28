@@ -25,6 +25,8 @@ class Frame:
             self.vacancyReplacement = vacancyReplacement
         if not self.isLinux:
             os.system("")
+        sys.stdout.write("\033[?25l")
+        sys.stdout.flush()
 
     def _newStructure_(self, lineNumber: int, columnsNumber: int):
         self._structure_ = [[None] * columnsNumber for _ in range(lineNumber)]
@@ -144,15 +146,13 @@ class Frame:
 
             if (excess := size.columns % self.columnsNumber) != 0:
                 text += fb * excess
-            if i < len(self._structure_) - 1:
+            if i < len(self._structure_):
                 text += "\n"
 
         if text != self.text:
             self.text = text
-            # sys.stdin.write("\033c")
-            # sys.stdin.write("\033c",text)
-            # sys.stdin.flush()
-            print("\033c" + text)
+            sys.stdout.write("\033c" + text)
+            sys.stdout.flush()
 
     def firesLoading(self):
         self.pool.submit(self._keyEvent_)
@@ -166,4 +166,4 @@ class Frame:
 
     def close(self):
         self.pool.shutdown(wait=False)
-        print("\033c")
+        sys.stdout.write(f"\033[?25h\033c")
