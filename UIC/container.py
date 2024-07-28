@@ -1,7 +1,9 @@
 import os
 import sys
 from concurrent.futures.thread import ThreadPoolExecutor
+
 import keyboard
+
 from UIC.module.Button import Button
 
 
@@ -15,6 +17,7 @@ class Frame:
         self.columnsNumber = columnsNumber
         self._structure_ = []
         self._newStructure_(lineNumber, columnsNumber)
+        self.text = ""
         self.bg = (0, 0, 0)
         if vacancyReplacement is None:
             self.vacancyReplacement = " " * 8
@@ -114,9 +117,10 @@ class Frame:
 
     def reset(self):
         size = os.get_terminal_size()
+        el_size = size.columns // self.columnsNumber
+        fb = f"\033[048;2;{self.bg[0]};{self.bg[1]};{self.bg[2]}m "
         text = ""
         for i in range(0, len(self._structure_)):
-            lineList = []
             for k in range(0, len(self._structure_[i])):
                 el = self.getWidget(i, k)
                 if el is None:
@@ -129,24 +133,26 @@ class Frame:
                     elObj = [
                         f"\033[038;2;{el.getColor()[0]};{el.getColor()[1]};{el.getColor()[2]}m\033[048;2;{el.getBackColor()[0]};{el.getBackColor()[1]};{el.getBackColor()[2]}m",
                         f"{el.getText()}", "\033[0m"]
-                lineList.append(elObj)
-            el_size = size.columns // self.columnsNumber
-            fb = f"\033[048;2;{self.bg[0]};{self.bg[1]};{self.bg[2]}m "
-            for index, j in enumerate(lineList):
-                if j is None:
+                # 对齐处理
+                if elObj is None:
                     text += fb * el_size
                 else:
-                    if len(j[1]) <= el_size:
-                        text += f"{j[0]}{j[1]}{j[2]}{fb * (el_size - len(j[1]))}"
+                    if len(elObj[1]) <= el_size:
+                        text += f"{elObj[0]}{elObj[1]}{elObj[2]}{fb * (el_size - len(elObj[1]))}"
                     else:
-                        text += f"{j[0]}{j[1][: el_size]}{j[2]}"
+                        text += f"{elObj[0]}{elObj[1][: el_size]}{elObj[2]}"
 
             if (excess := size.columns % self.columnsNumber) != 0:
                 text += fb * excess
             if i < len(self._structure_) - 1:
                 text += "\n"
-        print("\033c", end="")
-        print(text[: -1])
+
+        if text != self.text:
+            self.text = text
+            # sys.stdin.write("\033c")
+            # sys.stdin.write("\033c",text)
+            # sys.stdin.flush()
+            print("\033c" + text)
 
     def firesLoading(self):
         self.pool.submit(self._keyEvent_)
