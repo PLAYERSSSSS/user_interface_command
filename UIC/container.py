@@ -4,8 +4,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 
 import keyboard
 
-from UIC.module.Button import Button
-
 
 class Frame:
     def __init__(self, lineNumber: int, columnsNumber: int, threadingPool=ThreadPoolExecutor(max_workers=1),
@@ -25,7 +23,9 @@ class Frame:
             self.vacancyReplacement = vacancyReplacement
         if not self.isLinux:
             os.system("")
-        sys.stdout.write("\033[?25l")
+
+        sys.stdout = open(sys.stdout.fileno(), mode='w', buffering=1024 * 10)
+        sys.stdout.write("\033c\033[?25l")
         sys.stdout.flush()
 
     def _newStructure_(self, lineNumber: int, columnsNumber: int):
@@ -37,10 +37,8 @@ class Frame:
             isTransmit = True
             if el is not None and hasattr(el, "keyEvent"):
                 isTransmit = el.keyEvent(e, self)
-            if isTransmit:
-                return None
 
-            if e.event_type == 'down':
+            if e.event_type == 'down' and isTransmit:
                 i = self.point
                 while True:
                     if e.name == "down":
@@ -80,13 +78,16 @@ class Frame:
                     self._rollbackAnOperation_(e)
 
                 if e.name == "enter":
-                    if isinstance(element, Button):
+                    if hasattr(element, "press"):
                         element.press()
 
                 self.reset()
 
         keyboard.on_press(callback)
         keyboard.wait()
+
+    def setBackColor(self, RGB: (int, int, int)):
+        self.bg = RGB
 
     def setStructure(self, structure: list[list]):
         self._structure_ = structure
@@ -146,7 +147,7 @@ class Frame:
 
             if (excess := size.columns % self.columnsNumber) != 0:
                 text += fb * excess
-            if i < len(self._structure_):
+            if i < len(self._structure_) - 1:
                 text += "\n"
 
         if text != self.text:
