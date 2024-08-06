@@ -129,22 +129,34 @@ class Frame:
                 if el is None:
                     elObj = None
                 else:
-                    if i == self.point[0] and k == self.point[1] and el.getIsSelected():
-                        elObj = [
-                            f"\033[038;2;{el.getHoveColor()[0]};{el.getHoveColor()[1]};{el.getHoveColor()[2]}m\033[048;2;{el.getHoveBackColor()[0]};{el.getHoveBackColor()[1]};{el.getHoveBackColor()[2]}m",
-                            f"{el.getHoveText()}", "\033[0m"]
+                    if hasattr(el, "maintainItsOwnFormat"):
+                        if i == self.point[0] and k == self.point[1] and el.getIsSelected():
+                            elObj = el.getHoveText()
+                        else:
+                            elObj = el.getText()
                     else:
-                        elObj = [
-                            f"\033[038;2;{el.getColor()[0]};{el.getColor()[1]};{el.getColor()[2]}m\033[048;2;{el.getBackColor()[0]};{el.getBackColor()[1]};{el.getBackColor()[2]}m",
-                            f"{el.getText()}", "\033[0m"]
+                        if i == self.point[0] and k == self.point[1] and el.getIsSelected():
+                            elObj = [
+                                f"\033[038;2;{el.getHoveColor()[0]};{el.getHoveColor()[1]};{el.getHoveColor()[2]}m\033[048;2;{el.getHoveBackColor()[0]};{el.getHoveBackColor()[1]};{el.getHoveBackColor()[2]}m",
+                                f"{el.getHoveText()}", "\033[0m"]
+                        else:
+                            elObj = [
+                                f"\033[038;2;{el.getColor()[0]};{el.getColor()[1]};{el.getColor()[2]}m\033[048;2;{el.getBackColor()[0]};{el.getBackColor()[1]};{el.getBackColor()[2]}m",
+                                f"{el.getText()}", "\033[0m"]
                 # 对齐处理
                 if elObj is None:
                     text += fb * el_size
                 else:
-                    if len(elObj[1]) <= el_size:
-                        text += f"{elObj[0]}{elObj[1]}{elObj[2]}{fb * (el_size - len(elObj[1]))}"
+                    if not hasattr(el, "maintainItsOwnFormat"):
+                        if len(elObj[1]) <= el_size:
+                            text += f"{elObj[0]}{elObj[1]}{elObj[2]}{fb * (el_size - len(elObj[1]))}"
+                        else:
+                            text += f"{elObj[0]}{elObj[1][: el_size]}{elObj[2]}"
                     else:
-                        text += f"{elObj[0]}{elObj[1][: el_size]}{elObj[2]}"
+                        if len(elObj) <= el_size:
+                            text += f"{elObj}{fb * (el_size - len(elObj))}"
+                        else:
+                            text += elObj.getSlice(el_size)
 
             if (excess := size.columns % self.columnsNumber) != 0:
                 text += fb * excess

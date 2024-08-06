@@ -1,9 +1,9 @@
 class template:
-    def __init__(self, text: str):
+    def __init__(self, text: str, bg=(0, 0, 0), color=(255, 255, 255)):
         self._isSelected_ = True
         self._text_ = text
-        self._color_ = (255, 255, 255)
-        self._backColor_ = (0, 0, 0)
+        self._color_ = color
+        self._backColor_ = bg
         self._hoveText_ = text
         self._hoveColor_ = (255, 255, 255)
         self._hoveBackColor_ = (0, 0, 0)
